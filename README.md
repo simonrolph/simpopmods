@@ -1,7 +1,7 @@
 # R package: simpopmods
 
 An R package for generating simulated population models (IPMs and MPMs)
-:herb::mushroom::pig2::seedling::cactus:whale2::deciduous_tree::water_buffalo:
+:herb::mushroom::pig2::seedling::cactus::deciduous_tree::water_buffalo:
 
 ## About
 
