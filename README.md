@@ -31,7 +31,15 @@ Usage
 
 Before you generate any simulated populations, you first need to define a template for your population model. This is done through a IPM descriptor object. You can generate a template for the IPM descriptor by using the `init_IPM_desc()` function.
 
-An `simpopmods` IPM descriptor consists of \* Discrete states \* Continous states (which all share the same domain) \* Parameters \* Functions for generating parameters that are not sampled directly \* Demographic functions (equations of parameters) \* Kernels (consisting of demographic functions) \* Functions for the upper limit, lower limit and resolution of the kernel of the continious state domain.
+An `simpopmods` IPM descriptor consists of
+
+-   Discrete states
+-   Continous states (which all share the same domain)
+-   Parameters
+-   Functions for generating parameters that are not sampled directly
+-   Demographic functions (equations of parameters)
+-   Kernels (consisting of demographic functions)
+-   Functions for the upper limit, lower limit and resolution of the kernel of the continious state domain.
 
 ``` r
 load("~/PhD/simpopmods/IPM_descs/plant_basic_IPM_desc.Rdata")
