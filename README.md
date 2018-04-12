@@ -2,7 +2,7 @@
 R package: simpopmods
 =====================
 
-An R package for generating *sim*ulated *pop*ulation *mod*els (IPMs and MPMs)
+An R package for generating **sim**ulated **pop**ulation **mod**els (IPMs and MPMs)
 
 :herb::mushroom::pig2::seedling::cactus::deciduous\_tree::water\_buffalo:
 
@@ -11,7 +11,7 @@ This package is under active development - do not use
 About
 -----
 
-This is an R package I have been developing for my PhD research to simulate population models. It uses integral projection model
+This is an R package I have been developing for my PhD research to simulate population models. It uses integral projection models.
 
 Installation
 ------------
@@ -40,6 +40,8 @@ An `simpopmods` IPM descriptor consists of
 -   Demographic functions (equations of parameters)
 -   Kernels (consisting of demographic functions)
 -   Functions for the upper limit, lower limit and resolution of the kernel of the continious state domain.
+
+Here's one I made earlier:
 
 ``` r
 load("~/PhD/simpopmods/IPM_descs/plant_basic_IPM_desc.Rdata")
