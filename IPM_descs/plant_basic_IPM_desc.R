@@ -67,7 +67,6 @@ demo_fns <- list(
 
   ## b_z Seed production function
   seed = function(z, params){
-    z <- min(z,1)
     N <- exp(params["seed.int"] + params["seed.z"] * z)   # seed production of a size z plant
     return(N)
   },
@@ -133,9 +132,6 @@ kernel_res <- function(params,IPM_desc,units_per_sd = 25){
   return(units_per_sd/min_sd)
 }
 
-
-
-
 # IPM_desc object
 IPM_desc <- list(
   states = states,
@@ -150,5 +146,6 @@ IPM_desc <- list(
   kernel_res = kernel_res
 )
 
+
 save(IPM_desc,file = "IPM_descs/plant_basic_IPM_desc.Rdata")
-save(IPM_desc,file = "tests/testthat/helper_plant_basic_IPM_desc.Rdata")
+#save(IPM_desc,file = "tests/testthat/helper_plant_basic_IPM_desc.Rdata")

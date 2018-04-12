@@ -1,4 +1,4 @@
-init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kernels,params,n_demo_fns){
+init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kernels,params,n_demo_fns,file){
   if (length(states) != length(states_z)){
     stop(paste0("Number of defined states (n=",length(states),") and logical vector of whether they have continious size (n=",length(states_z),") are not the same length."))
   }
@@ -11,17 +11,28 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
     n_params <- length(params)
   }
 
+  o <- c("---")
 
-  o <- c("")
-  o <- c(o,paste0("IPM descriptor object - ",name))
+  o <- c(o,paste0('title: "IPM Descriptor Object - ',name,'"'))
+  o <- c(o,"output: html_document")
+  o <- c(o,"---")
   o <- c(o,"")
+  o <- c(o,"## States and kernels")
+  o <- c(o,"")
+  o <- c(o,"Here we need to define the different discrete states and whether there is a continious size state within these discrete states. For example if we want to model a plant population we might have three discrete states: 'seed', 'immature' and 'mature'. This IPM discriptor format is limited to one continious size domain. For these three discrete size classes immature and mature plants also have a continious size state. Therefore we would have `states <- c('seed','immature','mature')` and `states_z <- c('F','T','T')`.")
+  o <- c(o,"")
+  o <- c(o,"In order to differentiate different demographic processes, such as reproduction and growth/survival we put them into different kernels. For example we might use `kernels <- c('P','Fec','Clo')` where `P` is the growth/survival kernel, `Fec` is the sexual reproduction kernel and `Clo` is a kernel describing clonal reproduction")
   o <- c(o,"")
   o <- c(o,"```{r}")
-  o <- c(o,"")
   o <- c(o,paste0('states <- c(',paste(shQuote(states), collapse=", "),')'))
   o <- c(o,paste0('states_z <- c(',paste(shQuote(states_z), collapse=", "),')'))
   o <- c(o,paste0('kernels <- c(',paste(shQuote(kernels), collapse=", "),')'))
+  o <- c(o,"```")
   o <- c(o,"")
+  o <- c(o,"## Parameter information")
+  o <- c(o,"")
+  o <- c(o,"```{r}")
+
   o <- c(o,"par_info <- data.frame(t(data.frame(")
   for (i in 1:n_params){
     line <- paste0("   ",params[i],'  =  c(par = "',params[i],'",min = -Inf,max = Inf,samp = T)')
@@ -45,6 +56,8 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   o <- c(o,")")
   o <- c(o,"```")
   o <- c(o,"")
+  o <- c(o,"## Demographic functions")
+  o <- c(o,"")
   o <- c(o,"")
   o <- c(o,"```{r}")
   o <- c(o,'demo_fns <- list(')
@@ -64,6 +77,8 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
 
   o <- c(o,"```")
   o <- c(o,"")
+  o <- c(o,"## Kernel functions")
+  o <- c(o,"")
   o <- c(o,"```{r}")
   o <- c(o,"kernel_fns <- init_nested_list(kernels,states)")
   for(kern in kernels){
@@ -82,7 +97,7 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   }
   o <- c(o,"```")
 
-  o <- c(o,"Kernel size limit functions")
+  o <- c(o,"## Kernel size limit functions")
   o <- c(o,"")
   o <- c(o,"```{r}")
   o <- c(o,"# lower size limit")
@@ -104,6 +119,8 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   o <- c(o,"}")
   o <- c(o,"```")
   o <- c(o,"")
+  o <- c(o,"## Create IPM descriptor object")
+  o <- c(o,"")
   o <- c(o,"```{r}")
   o <- c(o,paste0(name,"<- list("))
   o <- c(o,"  states = states,")
@@ -124,7 +141,12 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   o <- c(o,paste0("save(",name,",file = stop(\"'file' must be specified\"))"))
   o <- c(o,"```")
 
-  return(writeLines(o))
+  fileConn<-file(file)
+  writeLines(o, fileConn)
+  close(fileConn)
+  cat("file saved")
+
+  return(o)
 }
 
 

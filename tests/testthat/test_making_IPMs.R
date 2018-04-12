@@ -166,12 +166,11 @@ test_that("MPM should have same stable stage distribution as quantiles specified
 
 context("Make an IPM descriptor template")
 
-name = "egg"
-states = c("egg","not_an_egg")
-states_z = c(T,T)
-kernels = c("Fec","P")
-params = c("par1","par2")
+name = "Test_IPM"
+states = c("seed","immature","mature")
+states_z = c(F,T,T)
+kernels = c("Fec","P","Clo")
+params = 10
 n_demo_fns = 3
 
-IPM_descriptor_template <- init_IPM_desc(name="test_IPM",states=states,states_z = states_z,kernels = kernels,params=2,n_demo_fns = 2)
-
+IPM_descriptor_template <- init_IPM_desc(name="test_IPM",states=states,states_z = states_z,kernels = kernels,params=params,n_demo_fns = 2,file = "test.Rmd")

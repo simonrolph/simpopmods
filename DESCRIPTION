@@ -1,12 +1,11 @@
-Package: fakeplants
+Package: simpopmods
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Title: Generating Simulated Population Models
+Version: 0.0.1
+Author: Simon Rolph
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: 
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
