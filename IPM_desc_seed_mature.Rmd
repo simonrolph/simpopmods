@@ -1,0 +1,253 @@
+---
+title: "IPM Descriptor Object - IPM_desc_seed_mature"
+output: html_document
+---
+
+## States and kernels
+
+Here we need to define the different discrete states and whether there is a continious size state within these discrete states. For example if we want to model a plant population we might have three discrete states: 'seed', 'immature' and 'mature'. This IPM discriptor format is limited to one continious size domain. For these three discrete size classes immature and mature plants also have a continious size state. Therefore we would have `states <- c('seed','immature','mature')` and `states_z <- c('F','T','T')`.
+
+In order to differentiate different demographic processes, such as reproduction and growth/survival we put them into different kernels. For example we might use `kernels <- c('P','Fec','Clo')` where `P` is the growth/survival kernel, `Fec` is the sexual reproduction kernel and `Clo` is a kernel describing clonal reproduction
+
+```{r}
+states <- c("seed", "immature", "mature")
+states_z <- c("FALSE", "TRUE", "TRUE")
+kernels <- c("P", "Fec")
+```
+
+## Parameter information
+
+```{r}
+par_info <- data.frame(t(data.frame(
+   surv.int  =  c(par = "surv.int",min = -10,max = 4,samp = T),
+  surv.z    =   c(par = "surv.z",min = 0,max = 10,samp = T),
+
+  ## flowering
+  flow.int  = c(par = "flow.int",min = -10,max = 10,samp = T),
+  flow.z    =   c(par = "flow.z",min = 0,max = 10,samp = T),
+
+  ## growth
+  grow.int  =   c(par = "grow.int",min = 0,max = 1,samp = T),
+  grow.z    =   c(par = "grow.z",min = 0,max = 1,samp = F), # constrained from 0 to 1
+  grow.sd   =   c(par = "grow.sd",min = 0.01,max = 0.5,samp = T),
+
+  ## recruit size
+  rcsz.int  =   c(par = "rcsz.int",min = 0,max = 0,samp = F), # doesn't change
+  rcsz.sd   =   c(par = "rcsz.sd",min = 0.1,max = 0.5,samp = T),
+
+  ## seed size
+  seed.int  =   c(par = "seed.int",min = 0,max = 100,samp = T),
+  seed.z    =   c(par = "seed.z",min = 0,max = 10,samp = T),
+
+  #seedbank dymanics
+  sdbk.surv =   c(par = "sdbk.surv",min = 0,max = 1,samp = T),
+  sdbk.entr =   c(par = "sdbk.entr",min = 0,max = 1,samp = T),
+  sdbk.exit =   c(par = "sdbk.exit",min = 0,max = 1,samp = T),
+
+  # maturity
+  matu.int =   c(par = "matu.int",min = 0,max = 1,samp = T),
+  matu.z   =   c(par = "matu.z",min = 0,max = 1,samp = T),
+
+  ## recruitment probability
+  p.r       =   c(par = "p.r",min = 0,max = 0.99,samp = T) # constrained from 0 to 1
+)),stringsAsFactors=F)
+
+par_info$min <- as.numeric(par_info$min);par_info$max <- as.numeric(par_info$max)
+
+par_fns <- list(
+rcsz.int = function(params){0},
+  grow.z = function(params){1 - params["grow.int"]}
+)
+```
+
+## Demographic functions
+
+
+```{r}
+demo_fns <- list(
+ grow = function(z1, z, params){
+    mu <- params["grow.int"] + params["grow.z"] * z           # mean size next year
+    sig <- params["grow.sd"]                                 # sd about mean
+    p.den.grow <- dnorm(z1, mean = mu, sd = sig)             # pdf that you are size z1 given you were size z
+    return(p.den.grow)
+  },
+
+  ## s_z Survival function, logistic regression
+  surv = function(z, params){
+
+    linear.p <- params["surv.int"] + params["surv.z"] * z  # linear predictor
+    p <- pmin(1/(1+exp(-linear.p)),rep(0.99,length(z))) # logistic transformation to probability with constant cap
+    p <- 1/(1+exp(-linear.p))
+    return(p)
+  },
+
+  ## p_bz Probability of flowering function, logistic regression
+  flow = function(z, params){
+    linear.p <- params["flow.int"] + params["flow.z"] * z      # linear predictor
+    p <- 1/(1+exp(-linear.p))                                # logistic transformation to probability
+    return(p)
+  },
+
+  ## b_z Seed production function
+  seed = function(z, params){
+    N <- exp(params["seed.int"] + params["seed.z"] * z)   # seed production of a size z plant
+    return(N)
+  },
+
+  ## c_0z1 Recruit size pdf
+  rcsz = function(z1, params){
+    mu <- params["rcsz.int"]
+    sig <- params["rcsz.sd"]
+    p.deRecr <- dnorm(z1, mean = mu, sd = sig)              # pdf of a size z1 recruit
+    return(p.deRecr)
+  },
+
+ #maturation
+  matu = function(z, params){
+    linear.p <- params["matu.int"] + params["matu.z"] * z      # linear predictor
+    p <- 1/(1+exp(-linear.p))                                # logistic transformation to probability
+    return(p)
+  }
+)
+```
+
+## Kernel functions
+
+```{r}
+kernel_fns <- init_nested_list(kernels,states)
+
+### KERNEL: P
+# seed -> seed
+kernel_fns$P$seed$seed <- function (z1, z, params) {
+   return( (1-params["sdbk.exit"]) * params["sdbk.surv"])
+}
+
+# seed -> immature
+kernel_fns$P$immature$seed <- function (z1, z, params) {
+   return( params["sdbk.exit"] * params["p.r"] * IPM_desc$demo_fns$rcsz(z1, params) * (1-matu(z1,params)))
+}
+
+# seed -> mature
+kernel_fns$P$mature$seed <- function (z1, z, params) {
+   return( params["sdbk.exit"] * params["p.r"] * IPM_desc$demo_fns$rcsz(z1, params)* matu(z1,params))
+}
+
+
+# immature -> immature
+kernel_fns$P$immature$immature <- function (z1, z, params) {
+   return(IPM_desc_seed$demo_fns$surv(z, params) * IPM_desc_seed$demo_fns$grow(z1, z, params) * (1-matu(z1,params)) )
+}
+
+# immature -> mature
+kernel_fns$P$mature$immature <- function (z1, z, params) {
+   return(IPM_desc_seed$demo_fns$surv(z, params) * IPM_desc_seed$demo_fns$grow(z1, z, params) * matu(z1,params) )
+}
+
+# mature -> seed
+kernel_fns$P$seed$mature <- function (z1, z, params) {
+   return()
+}
+
+
+# mature -> mature
+kernel_fns$P$mature$mature <- function (z1, z, params) {
+  return(IPM_desc_seed$demo_fns$surv(z, params) * IPM_desc_seed$demo_fns$grow(z1, z, params))
+}
+
+
+### KERNEL: Fec
+# seed -> seed
+kernel_fns$Fec$seed$seed <- function (z1, z, params) {
+   return()
+}
+
+# seed -> immature
+kernel_fns$Fec$immature$seed <- function (z1, z, params) {
+   return()
+}
+
+# seed -> mature
+kernel_fns$Fec$mature$seed <- function (z1, z, params) {
+   return()
+}
+
+# immature -> seed
+kernel_fns$Fec$seed$immature <- function (z1, z, params) {
+   return()
+}
+
+# immature -> immature
+kernel_fns$Fec$immature$immature <- function (z1, z, params) {
+   return()
+}
+
+# immature -> mature
+kernel_fns$Fec$mature$immature <- function (z1, z, params) {
+   return()
+}
+
+# mature -> seed
+kernel_fns$Fec$seed$mature <- function (z1, z, params) {
+   return()
+}
+
+# mature -> immature
+kernel_fns$Fec$immature$mature <- function (z1, z, params) {
+   return()
+}
+
+# mature -> mature
+kernel_fns$Fec$mature$mature <- function (z1, z, params) {
+   return()
+}
+
+```
+## Kernel size limit functions
+
+```{r}
+# lower size limit
+limit_lower <- function(params,
+IPM_desc_seed_mature
+){
+  
+  return()
+}
+
+#upper size limit
+limit_upper <- function(params,
+IPM_desc_seed_mature
+){
+  
+  return()
+}
+
+# function to determine the resolution of the kernel
+kernel_res <- function(params,
+IPM_desc_seed_mature
+){
+  
+  return()
+}
+```
+
+## Create IPM descriptor object
+
+```{r}
+IPM_desc_seed_mature<- list(
+  states = states,
+  states_z = states_z,
+  kernels = kernels,
+  par_info = par_info,
+  par_fns = par_fns,
+  demo_fns = demo_fns,
+  kernel_fns = kernel_fns,
+  limit_lower = limit_lower,
+  limit_upper = limit_upper,
+  kernel_res = kernel_res
+)
+
+class(IPM_desc_seed_mature) <- append(class(IPM_desc_seed_mature),'IPM_descriptor')
+
+# Save the IPM descriptor object
+save(IPM_desc_seed_mature,file = stop("'file' must be specified"))
+```

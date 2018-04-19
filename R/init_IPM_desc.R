@@ -1,8 +1,19 @@
-init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kernels,params,n_demo_fns,file){
+init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kernels,params,n_demo_fns,file = NA){
   if (length(states) != length(states_z)){
     stop(paste0("Number of defined states (n=",length(states),") and logical vector of whether they have continious size (n=",length(states_z),") are not the same length."))
   }
 
+
+  if (is.na(file)){
+    file <- paste0(getwd(),"/",name,".Rmd")
+  }
+
+  if (file.exists(file)) {
+    overwrite <- readline(prompt=paste0(file," already exists,\n are you sure you want to overwrite?\n (y/n)\n"))
+    if (overwrite != "y"){
+      stop("User does not want to overwrite file, choose a new file name")
+    }
+  }
 
   if (is.numeric(params)){
     n_params <- params

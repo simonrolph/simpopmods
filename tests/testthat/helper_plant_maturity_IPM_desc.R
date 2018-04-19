@@ -121,7 +121,12 @@ kernel_fns$P$mature$mature <- function (z1, z, params) {
 
 kernel_fns$Fec$immature$mature <- function (z1, z, params) {
   #flowering * number of seeds * recruit svival * recruit size
-  return( IPM_desc_maturity$demo_fns$flow(z, params) * IPM_desc_maturity$demo_fns$seed(z, params) * params["p.r"] * IPM_desc_maturity$demo_fns$rcsz(z1, params))
+  return( IPM_desc_maturity$demo_fns$flow(z, params) * IPM_desc_maturity$demo_fns$seed(z, params) * params["p.r"] * IPM_desc_maturity$demo_fns$rcsz(z1, params) * (1-IPM_desc_maturity$demo_fns$matu(z, params)))
+}
+
+kernel_fns$Fec$mature$mature <- function (z1, z, params) {
+  #flowering * number of seeds * recruit svival * recruit size
+  return( IPM_desc_maturity$demo_fns$flow(z, params) * IPM_desc_maturity$demo_fns$seed(z, params) * params["p.r"] * IPM_desc_maturity$demo_fns$rcsz(z1, params) * IPM_desc_maturity$demo_fns$matu(z, params))
 }
 
 
