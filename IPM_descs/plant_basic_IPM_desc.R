@@ -88,17 +88,19 @@ kernel_fns <- init_nested_list(kernels,states)
 
 # SURVIVAL/GROWTH
 kernel_fns$P$mature$mature <- function (z1, z, params) {
-  return(IPM_desc$demo_fns$surv(z, params) * IPM_desc$demo_fns$grow(z1, z, params))
+  demo_fns <- get_dm_fns()
+  return(demo_fns$surv(z, params) * demo_fns$grow(z1, z, params))
 }
 
 # FECUNDITY
 kernel_fns$Fec$mature$mature <- function (z1, z, params) {
   #flowering * number of seeds * recruit survival * recruit size * seedbank splitter
-  return( IPM_desc$demo_fns$flow(z, params) * IPM_desc$demo_fns$seed(z, params) * params["p.r"] * IPM_desc$demo_fns$rcsz(z1, params))
+  demo_fns <- get_dm_fns()
+  return( demo_fns$flow(z, params) * demo_fns$seed(z, params) * params["p.r"] * demo_fns$rcsz(z1, params))
 }
 
 # lower size limit to prevent eviction
-limit_lower <- function(params, IPM_desc){
+limit_lower <- function(params){
   max_sd <- params["rcsz.sd"]+params["grow.sd"]
   # returns the lower size limit of the kernel
   # a value of 0.05 means that 5% of new recruits are evicted
@@ -107,16 +109,17 @@ limit_lower <- function(params, IPM_desc){
 }
 
 #upper size limit to prevent eviction
-limit_upper <- function(params,IPM_desc){
+limit_upper <- function(params){
+  demo_fns <- get_dm_fns()
 
   upper_lims <- seq(from = 2, to = 10, by = 1)
 
   #Calculate the proportion of individuals wrongly evicted at a size with a size limit
-  fac1 <- IPM_desc$demo_fns$surv(upper_lims, params) # survival probability ~ z
+  fac1 <- demo_fns$surv(upper_lims, params) # survival probability ~ z
   #integrate(function(x) IPM_desc$demo_fns$grow(x, z, params), U, Inf)$value
 
   inter <- function(x) {
-    integrate(function(x) IPM_desc$demo_fns$grow(x, x, params), x, Inf)$value
+    integrate(function(x) demo_fns$grow(x, x, params), x, Inf)$value
   }
 
   fac2 <- sapply(upper_lims,inter)
@@ -128,25 +131,59 @@ limit_upper <- function(params,IPM_desc){
   return(upper_lim)
 }
 
-kernel_res <- function(params,IPM_desc,units_per_sd = 25){
+kernel_res <- function(params,units_per_sd = 25){
   min_sd <- min(params["rcsz.sd"],params["grow.sd"])
   return(units_per_sd/min_sd)
 }
 
-# IPM_desc object
-IPM_desc <- list(
-  states = states,
-  states_z = states_z,
-  kernels = kernels,
-  par_info = par_info,
-  par_fns = par_fns,
-  demo_fns = demo_fns,
-  kernel_fns = kernel_fns,
-  limit_lower = limit_lower,
-  limit_upper = limit_upper,
-  kernel_res = kernel_res
+
+setClass("IPM_desc_class",
+         slots = list(
+           states = "character",
+           states_z = "logical",
+           kernels = "character",
+           par_info = "data.frame",
+           par_fns = "list",
+           demo_fns = "list",
+           kernel_fns = "list",
+           limit_lower = "function",
+           limit_upper = "function",
+           kernel_res = "function"
+         )
 )
 
+IPM_desc <- new("IPM_desc_class",
+                states = states,
+                states_z = states_z,
+                kernels = kernels,
+                par_info = par_info,
+                par_fns = par_fns,
+                demo_fns = demo_fns,
+                kernel_fns = kernel_fns,
+                limit_lower = limit_lower,
+                limit_upper = limit_upper,
+                kernel_res = kernel_res
+)
 
-saveRDS(IPM_desc,file = "IPM_descs/plant_basic_IPM_desc.RDS")
+params <- c(
+  surv.int  =  0,
+  surv.z    =   2,
+  flow.int  = 0.3,
+  flow.z    =   0.1,
+  grow.int  =   0.2,
+  grow.sd   =   0.25,
+  rcsz.sd   =   0.3,
+  seed.int  =   2.35,
+  seed.z    =   2.37,
+  p.r       =   0.4
+)
+
+params_c <- make_full_params(params_ic = params, IPM_desc = IPM_desc)
+
+IPM <- make_kernels(params_c,IPM_desc = IPM_desc)
+IPM_eigen <- calc_dom_eig(MIPM=IPM,kernel = "K")
+
+
+
+#saveRDS(IPM_desc,file = "IPM_descs/plant_basic_IPM_desc.RDS")
 #saveRDS(IPM_desc,file = "tests/testthat/helper_plant_basic_IPM_desc.RDS")
