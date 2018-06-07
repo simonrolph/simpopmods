@@ -32,6 +32,7 @@ par_info <- data.frame(t(data.frame(
 
 par_info$min <- as.numeric(par_info$min)
 par_info$max <- as.numeric(par_info$max)
+par_info$samp <- as.logical(par_info$samp)
 
 # $par_fns
 par_fns <- list(
@@ -147,5 +148,5 @@ IPM_desc <- list(
 )
 
 
-save(IPM_desc,file = "IPM_descs/plant_basic_IPM_desc.Rdata")
-#save(IPM_desc,file = "tests/testthat/helper_plant_basic_IPM_desc.Rdata")
+saveRDS(IPM_desc,file = "IPM_descs/plant_basic_IPM_desc.RDS")
+#saveRDS(IPM_desc,file = "tests/testthat/helper_plant_basic_IPM_desc.RDS")

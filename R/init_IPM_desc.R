@@ -54,7 +54,7 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   }
   o <- c(o,')),stringsAsFactors=F)')
   o <- c(o,"")
-  o <- c(o,'par_info$min <- as.numeric(par_info$min);par_info$max <- as.numeric(par_info$max)')
+  o <- c(o,'par_info$min <- as.numeric(par_info$min);par_info$max <- as.numeric(par_info$max);par_info$samp <- as.logical(par_info$samp)')
   o <- c(o,"")
   o <- c(o,'par_fns <- list(')
   for (i in 1:n_params){
@@ -149,7 +149,7 @@ init_IPM_desc <- function(name = "untitled_IPM_descriptor",states,states_z,kerne
   o <- c(o,paste0("class(",name,") <- append(class(",name,"),'IPM_descriptor')"))
   o <- c(o,"")
   o <- c(o,"# Save the IPM descriptor object")
-  o <- c(o,paste0("save(",name,",file = stop(\"'file' must be specified\"))"))
+  o <- c(o,paste0("saveRDS(",name,",file = stop(\"'file' must be specified\"))"))
   o <- c(o,"```")
 
   fileConn<-file(file)

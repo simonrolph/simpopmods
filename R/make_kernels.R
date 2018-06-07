@@ -14,7 +14,7 @@ make_kernels <- function(params,IPM_desc) {
   L <- IPM_desc$limit_lower(params = params,IPM_desc = IPM_desc) #find the lower size limit
   U <- IPM_desc$limit_upper(params = params,IPM_desc = IPM_desc) # find the upper size limit
 
-  m <- min(5000,max(100,ceiling((U-L)*res))) #find the dimensions of the kernel
+  m <- min(1000,max(100,ceiling((U-L)*res))) #find the dimensions of the kernel
   h <- (U - L)/m # kernel pixel width
   meshpts <- L + ((1:m) - 1/2) * h # mesh points for z
 

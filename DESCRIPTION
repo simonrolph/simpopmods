@@ -1,11 +1,13 @@
 Package: simpopmods
 Type: Package
-Title: Generating Simulated Population Models
+Title: Simulated Population Models
 Version: 0.0.1
 Author: Simon Rolph
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: An R package dedicated to generating simulated population models as IPMs and discretised to MPMs
 License: 
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
+Imports:
+    DiagrammeR,
+    DiagrammeRsvg

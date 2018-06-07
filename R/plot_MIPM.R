@@ -1,13 +1,11 @@
-plot_IPM <- function(MIPM){
+plot_MIPM <- function(MIPM){
   par(mfrow=(c(1,1)))
-  plot.new()
   IPM_desc <- MIPM$IPM_desc
 
   par(mfrow=(c(length(IPM_desc$states),length(IPM_desc$states))))
 
 
   for (krnl in IPM_desc$kernels) {
-    title(krnl, side = 3, line = -21, outer = TRUE)
 
 
     # loop through each of the DESTINATION states
@@ -19,7 +17,7 @@ plot_IPM <- function(MIPM){
           image(x = MIPM$meshpts,
                 y = MIPM$meshpts,
                 z = t(MIPM$kernels[[krnl]][[dst]][[ori]]),
-                main = paste(krnl,ori,dst,sep="-"),
+                main = paste(krnl,"-",ori,"to",dst),
                 xlab = "size",
                 ylab = "size next")
         } else {

@@ -97,7 +97,7 @@ kernel_fns$P$mature$mature <- function (z1, z, params) {
 }
 
 kernel_fns$P$mature$seed <- function (z1, z, params) {
-  return( params["sdbk.exit"] * params["p.r"] * IPM_desc$demo_fns$rcsz(z1, params))
+  return( params["sdbk.exit"] * params["p.r"] * IPM_desc_seed$demo_fns$rcsz(z1, params))
 }
 
 kernel_fns$P$seed$seed <- function (z1, z, params) {
