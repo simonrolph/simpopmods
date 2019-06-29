@@ -25,6 +25,7 @@ library(devtools)
 #install_github("simonrolph/simpopmods")
 library(simpopmods)
 
+#install.packages("rsvg")
 library(DiagrammeR)
 ```
 
@@ -34,6 +35,10 @@ library(DiagrammeR)
     ## The following object is masked from 'package:devtools':
     ## 
     ##     add_path
+
+``` r
+library(ggplot2)
+```
 
 Usage
 -----
@@ -306,6 +311,16 @@ as.numeric(calc_dom_eig(MPM)$w)
 
     ## [1] 0.1954836 0.1983487 0.3008145 0.3053532
 
+You can also plot the individual trajectories as IPM diagnosis with `plot_trajectories(MIPM,pop_n = 100,t_steps = 50)`
+
+*This currently only works for IPMs, not discretised MPMs*
+
+``` r
+plot_trajectories(IPM,pop_n = 100,t_steps = 50)
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+
 ### Sampling parameter sets
 
 I have been using an Adaptive Metrpolis algorithm implemented with `FME::modMCMC` with success.
@@ -384,14 +399,14 @@ samples <- modMCMC(f = likelihood_function, # -2*log likelihood function
                       )
 ```
 
-    ## number of accepted runs: 66 out of 200 (33%)
+    ## number of accepted runs: 102 out of 200 (51%)
 
 ``` r
 # how long did this take?
 Sys.time() - start_time
 ```
 
-    ## Time difference of 1.748709 mins
+    ## Time difference of 2.007547 mins
 
 ``` r
 #extract the parameter sets from the MCMC object and generate a full set of parameters to include those that cwere not sampled directly
@@ -405,7 +420,7 @@ param_sets <- as.data.frame(unique(param_sets))
 pairs(param_sets,pch = ".")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 Calculate lambda from the parameter sets to see that lambda is ~ 1 (or at least converging towards in this short run)
 
@@ -424,7 +439,7 @@ param_sets$lambda <- apply(param_sets,
 plot(param_sets$lambda)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 That's just a taster. You need a lots of burn in and thinning to remove autocorrelation to generate anything vaguely useful.
 

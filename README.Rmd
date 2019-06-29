@@ -25,7 +25,10 @@ library(devtools)
 #install_github("simonrolph/simpopmods")
 library(simpopmods)
 
+#install.packages("rsvg")
 library(DiagrammeR)
+
+library(ggplot2)
 ```
 
 ## Usage
@@ -274,6 +277,14 @@ calc_dom_eig(MPM)$lambda
 
 diff(qtiles)
 as.numeric(calc_dom_eig(MPM)$w)
+```
+
+You can also plot the individual trajectories as IPM diagnosis with `plot_trajectories(MIPM,pop_n = 100,t_steps = 50)`
+
+*This currently only works for IPMs, not discretised MPMs*
+
+```{r}
+plot_trajectories(IPM,pop_n = 100,t_steps = 50)
 ```
 
 ### Sampling parameter sets

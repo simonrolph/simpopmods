@@ -195,6 +195,7 @@ make_MPM <- function(params_c, IPM_desc, qtiles, submesh_res = 200) {
       megakernels = megakernels,
       kernels = kernels,
       meshpts = mids,
+      stage_boundaries = stage_boundaries,
       params = params_c,
       IPM_desc = IPM_desc,
       stage_ref = stage_ref
